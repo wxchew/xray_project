@@ -16,6 +16,7 @@ from pathlib import Path
 import torch
 import torchvision
 from torch import nn
+from torch.torch_version import TorchVersion
 from torchvision.io import ImageReadMode, read_image
 from torchvision.models import resnet18
 from torchvision.transforms import v2
@@ -80,8 +81,15 @@ def features_and_logits(model: FrozenResNet18, x: torch.Tensor):
 
 
 def load_trained_model(checkpoint_path, device="cpu") -> FrozenResNet18:
-    """Load a saved checkpoint, accepting either save format 04b has produced."""
-    state = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+    """Load a saved checkpoint, accepting either save format 04b has produced.
+
+    04b records the torch version next to the weights, so the file holds a TorchVersion
+    object. Since PyTorch 2.6 `weights_only=True` is the default and rejects it. We keep
+    weights_only=True, which still refuses arbitrary code, and allowlist just that one
+    class rather than turning the protection off.
+    """
+    with torch.serialization.safe_globals([TorchVersion]):
+        state = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
     if "model_state_dict" in state:
         state = state["model_state_dict"]
     if "conv1.weight" in state:  # saved without the wrapper prefix
