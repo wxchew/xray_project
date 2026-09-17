@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# macOS
+.DS_Store
+
+# Generated analysis outputs (regenerate by running the notebooks)
+feature_clusters/
+
+# Training checkpoints and sweep variants.
+# The two published models, cnn_pneumonia_model.pt and resnet18_pneumonia_model.pt,
+# are tracked deliberately: the notebooks load them by sha256.
+resnet18_checkpoint.pt
+cnn_pneumonia_model_*.pt
